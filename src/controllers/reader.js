@@ -1,6 +1,34 @@
 const { Reader } = require('../models');
 
 exports.create = async (req, res) => {
+	const checkName = req.body.name;
+	const checkEmail = req.body.email;
+	const checkPassword = req.body.password;
+
+	if (checkName == null || checkEmail == null || checkPassword == null) {
+		return res
+			.status(400)
+			.send({ error: 'Please ensure all fields are completed.' });
+	}
+
+	const checkExisting = await Reader.findAll({
+		where: {
+			email: req.body.email,
+		},
+	});
+
+	if (checkExisting[0]) {
+		return res
+			.status(409)
+			.send({ error: `User with email ${req.body.email} already exists.` });
+	}
+
+	if (checkPassword.length < 8 || checkPassword.length > 16) {
+		return res.status(422).send({
+			error: 'Please enter a password between 8 - 16 characters long.',
+		});
+	}
+
 	const newReader = await Reader.create(req.body);
 	res.status(201).json(newReader);
 };
