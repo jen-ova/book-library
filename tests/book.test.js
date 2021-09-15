@@ -34,6 +34,19 @@ describe('/books', () => {
 				expect(newBookRecord.genre).to.equal('apocalyptic');
 				expect(newBookRecord.ISBN).to.equal('4903713180');
 			});
+
+			it('returns an error if a field is empty', async () => {
+				const response = await request(app).post('/books').send({
+					title: 'Evangelion: 1.0 You Are (Not) Alone',
+					genre: 'apocalyptic',
+					ISBN: '4903713180',
+				});
+
+				expect(response.status).to.equal(400);
+				expect(response.body.error).to.equal(
+					'Please ensure title and author fields are completed.'
+				);
+			});
 		});
 	});
 
@@ -61,6 +74,23 @@ describe('/books', () => {
 					ISBN: '9784905033059',
 				}),
 			]);
+		});
+
+		describe('POST /books', () => {
+			it('returns an error if the book title and author already exists', async () => {
+				const response = await request(app).post('/books').send({
+					title: '1.0 You Are (Not) Alone',
+					author: 'Hideaki Anno',
+					genre: 'apocalyptic',
+					ISBN: '9784905033028',
+				});
+
+				expect(response.status).to.equal(409);
+				expect(response.body.error).to.equal(
+					'The book 1.0 You Are (Not) Alone already exists in the library.'
+				);
+				console.log(response.body.error);
+			});
 		});
 
 		describe('GET /books', () => {
